@@ -1,3 +1,35 @@
 spring:
   application:
     name: taxi-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taxi_db
+    username: postgres
+    password: xxxxxxxx
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+    redis:
+      host: localhost
+      port: 6379
+
+  security:
+    user:
+      password: disabled
+
+taxi:
+  tariff:
+    per-km: 15.0
+  jwt:
+    secret: "TaxiBackendSecretKey"
+    expiration-ms: 86400000
+
+logging:
+  level:
+    org.flywaydb: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

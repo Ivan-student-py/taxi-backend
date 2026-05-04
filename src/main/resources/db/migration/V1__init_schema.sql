@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS passengers (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(50),
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS drivers (
     phone VARCHAR(50),
     license_number VARCHAR(100) UNIQUE NOT NULL,
     status VARCHAR(20) CHECK (status IN ('FREE', 'BUSY', 'OFFLINE', 'ON_TRIP')) DEFAULT 'OFFLINE',
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

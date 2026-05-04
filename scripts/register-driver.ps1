@@ -1,0 +1,30 @@
+$baseUrl = "http://127.0.0.1:8080"
+
+$body = @{
+    name = "Alex Driver"
+    email = "driver@test.com"
+    phone = "+79997654321"
+    licenseNumber = "LIC-123456"
+    status = "FREE"
+    password = "pass123"
+} | ConvertTo-Json
+
+Write-Host "[INFO] Sending driver registration request..." -ForegroundColor Cyan
+
+try {
+    $response = Invoke-RestMethod -Uri "$baseUrl/auth/register/driver" `
+        -Method Post `
+        -ContentType "application/json" `
+        -Body $body `
+        -TimeoutSec 10
+
+    Write-Host "[SUCCESS] Request completed!" -ForegroundColor Green
+    $response | ConvertTo-Json -Depth 10
+
+    if ($response.token) {
+        $response.token | Out-File -FilePath "scripts/.token_driver" -Encoding utf8
+        Write-Host "[INFO] Token saved to scripts/.token_driver" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "[ERROR] Request failed: $($_.Exception.Message)" -ForegroundColor Red
+}

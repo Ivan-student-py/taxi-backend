@@ -2,7 +2,7 @@ $baseUrl = "http://127.0.0.1:8080"
 
 $body = @{
     name = "Ivan"
-    email = "ivan2@test.com"
+    email = "ivan@test.com"
     phone = "+79991234567"
     password = "pass123"
 } | ConvertTo-Json

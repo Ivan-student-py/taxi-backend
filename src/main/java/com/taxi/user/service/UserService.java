@@ -2,6 +2,8 @@ package com.taxi.user.service;
 
 import com.taxi.shared.Role;
 import com.taxi.security.JwtUtils;
+import com.taxi.shared.cache.RedisDriverCache;
+import com.taxi.shared.DriverStatus;
 import com.taxi.user.dto.*;
 import com.taxi.user.entity.Driver;
 import com.taxi.user.entity.Passenger;
@@ -20,13 +22,18 @@ public class UserService {
     private final DriverRepository driverRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final RedisDriverCache driverCache;
 
-    public UserService(PassengerRepository passengerRepo, DriverRepository driverRepo,
-                       PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public UserService(PassengerRepository passengerRepo,
+                       DriverRepository driverRepo,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtils jwtUtils,
+                       RedisDriverCache driverCache) {
         this.passengerRepo = passengerRepo;
         this.driverRepo = driverRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.driverCache = driverCache;
     }
 
     @Transactional
@@ -58,7 +65,7 @@ public class UserService {
                 .email(req.email())
                 .phone(req.phone())
                 .licenseNumber(req.licenseNumber())
-                .status(req.status() != null ? req.status() : com.taxi.shared.DriverStatus.OFFLINE)
+                .status(req.status() != null ? req.status() : DriverStatus.OFFLINE)
                 .passwordHash(passwordEncoder.encode(req.password()))
                 .build();
         driverRepo.save(driver);
@@ -91,10 +98,19 @@ public class UserService {
     }
 
     @Transactional
-    public Driver updateDriverStatus(Long id, com.taxi.shared.DriverStatus newStatus) {
+    public Driver updateDriverStatus(Long id, DriverStatus newStatus) {
         Driver driver = driverRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Driver is not found."));
+
         driver.setStatus(newStatus);
-        return driverRepo.save(driver);
+        driverRepo.save(driver);
+
+        if (newStatus == DriverStatus.FREE) {
+            driverCache.addFreeDriver(id);
+        } else {
+            driverCache.removeDriver(id);
+        }
+
+        return driver;
     }
 }

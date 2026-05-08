@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
     List<Trip> findByPassengerId(Long passengerId);
+    List<Trip> findByDriverId(Long driverId);
+
+    boolean existsByPassengerIdAndStatusIn(Long passengerId,
+                                           java.util.List<com.taxi.trip.enums.TripStatus> statuses);
 }

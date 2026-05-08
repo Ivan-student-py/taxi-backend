@@ -1,3 +1,4 @@
+# scripts/check-notifications.ps1
 $baseUrl = "http://127.0.0.1:8080"
 
 Write-Host "[INFO] Checking Notification Worker metrics..." -ForegroundColor Cyan

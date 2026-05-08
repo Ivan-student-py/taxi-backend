@@ -43,6 +43,12 @@ public class TripController {
         return ResponseEntity.ok(tripService.updateStatus(id, status));
     }
 
+    @GetMapping("/driver/{driverId}")
+    @PreAuthorize("hasRole('DRIVER') or hasRole('ADMIN')")
+    public ResponseEntity<List<Trip>> getTripsByDriver(@PathVariable Long driverId) {
+        return ResponseEntity.ok(tripService.getTripsByDriver(driverId));
+    }
+
     @PatchMapping("/{id}/rate")
     @PreAuthorize("hasRole('PASSENGER')")
     public ResponseEntity<Trip> rateTrip(

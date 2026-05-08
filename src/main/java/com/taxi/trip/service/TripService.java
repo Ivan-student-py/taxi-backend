@@ -36,34 +36,35 @@ public class TripService {
     @Transactional
     public Trip createTrip(TripCreateRequest req) {
         if (!passengerRepo.existsById(req.passengerId())) {
-            throw new EntityNotFoundException("Passenger not found");
+            throw new EntityNotFoundException("Passenger not found with ID: " + req.passengerId());
+        }
+
+        List<TripStatus> activeStatuses = List.of(
+                TripStatus.CREATED, TripStatus.ASSIGNED, TripStatus.IN_PROGRESS
+        );
+        if (tripRepo.existsByPassengerIdAndStatusIn(req.passengerId(), activeStatuses)) {
+            throw new IllegalStateException("Passenger already has an active trip");
         }
 
         Driver driver = null;
 
         String cachedDriverId = driverCache.getRandomFreeDriverId();
         if (cachedDriverId != null) {
-            log.info("[CACHE HIT] Found candidate driver ID={} in Redis", cachedDriverId);
             Long id = Long.parseLong(cachedDriverId);
-            driver = driverRepo.findById(id).orElse(null);
-
-            if (driver == null || driver.getStatus() != DriverStatus.FREE) {
-                log.warn("[CACHE STALE] Driver {} is invalid. Removing from cache.", id);
-                driverCache.removeDriver(id);
-                driver = null;
+            Driver cached = driverRepo.findById(id).orElse(null);
+            if (cached != null && cached.getStatus() == DriverStatus.FREE) {
+                driver = cached;
             } else {
-                log.info("[ASSIGNED] Driver {} confirmed and selected from Redis cache.", driver.getId());
+                driverCache.removeDriver(id);
             }
         }
 
         if (driver == null) {
-            log.info("[CACHE MISS / FALLBACK] Executing SELECT ... FOR UPDATE in PostgreSQL");
             List<Driver> freeDrivers = driverRepo.findDriversByStatusForUpdate(DriverStatus.FREE);
             if (freeDrivers.isEmpty()) {
                 throw new IllegalStateException("No free drivers available");
             }
             driver = freeDrivers.get(0);
-            log.info("[ASSIGNED] Driver {} selected via DB fallback. Warming up cache.", driver.getId());
             driverCache.addFreeDriver(driver.getId());
         }
 
@@ -81,7 +82,6 @@ public class TripService {
         driver.setStatus(DriverStatus.BUSY);
         driverRepo.save(driver);
         driverCache.removeDriver(driver.getId());
-        log.info("[CACHE INVALIDATE] Removed driver {} from Redis (status: BUSY)", driver.getId());
 
         return tripRepo.save(trip);
     }
@@ -93,6 +93,12 @@ public class TripService {
 
     public List<Trip> getTripsByPassenger(Long passengerId) {
         return tripRepo.findByPassengerId(passengerId);
+    }
+    public List<Trip> getTripsByDriver(Long driverId) {
+        if (!driverRepo.existsById(driverId)) {
+            throw new EntityNotFoundException("Driver not found with ID: " + driverId);
+        }
+        return tripRepo.findByDriverId(driverId);
     }
 
     @Transactional

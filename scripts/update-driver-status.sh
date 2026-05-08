@@ -1,3 +1,4 @@
+#!/bin/bash
 ID="${1:-1}"
 STATUS="${2:-BUSY}"
 BASE_URL="http://127.0.0.1:8080"

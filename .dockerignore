@@ -1,0 +1,17 @@
+target/
+*.iml
+.idea/
+*.class
+*.jar
+*.log
+
+.git/
+.github/
+scripts/
+*.ps1
+*.sh
+.gitignore
+
+.env
+*.yaml.bak
+*.yml.bak

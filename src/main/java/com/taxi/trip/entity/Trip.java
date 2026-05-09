@@ -34,7 +34,6 @@ public class Trip {
 
     private Double distance;
 
-    @Column
     private Integer rating;
 
     @Column(name = "created_at")

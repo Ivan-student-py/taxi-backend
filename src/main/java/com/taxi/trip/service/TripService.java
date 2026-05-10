@@ -10,6 +10,8 @@ import com.taxi.user.repository.DriverRepository;
 import com.taxi.user.repository.PassengerRepository;
 import com.taxi.shared.cache.RedisDriverCache;
 import com.taxi.user.entity.Driver;
+import com.taxi.notification.dto.NotificationCreateRequest;
+import com.taxi.notification.service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class TripService {
     private final DriverRepository driverRepo;
     private final PassengerRepository passengerRepo;
     private final RedisDriverCache driverCache;
+    private final NotificationService notificationService;
 
     @Value("${taxi.tariff.per-km}")
     private double tariffPerKm;
@@ -116,6 +119,13 @@ public class TripService {
                 driverRepo.save(driver);
             }
         }
+        notificationService.createNotification(new NotificationCreateRequest(
+                trip.getId(),
+                "PASSENGER",
+                trip.getPassengerId(),
+                "Your trip status has been changed to: " + newStatus
+        ));
+
         return tripRepo.save(trip);
     }
 

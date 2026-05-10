@@ -1,6 +1,6 @@
 param(
     [int]$id = 1,
-    [string]$status = "BUSY"  # FREE, BUSY, OFFLINE, ON_TRIP
+    [string]$status = "BUSY"
 )
 
 $baseUrl = "http://127.0.0.1:8080"

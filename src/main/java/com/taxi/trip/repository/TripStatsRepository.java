@@ -16,6 +16,7 @@ public interface TripStatsRepository extends JpaRepository<Trip, Long> {
             ROUND(COALESCE(AVG(price), 0), 2) as average_price,
             COALESCE(SUM(price), 0) as total_revenue
         FROM trips
+        WHERE created_at >= CURRENT_DATE
         """, nativeQuery = true)
     TripStatsProjection getTripStatsNative();
 }

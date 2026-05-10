@@ -30,8 +30,8 @@ public class WorkerConfig {
             }
         });
 
-        executor.setWaitForTasksToCompleteOnShutdown(true);  // Ждать завершения текущих задач
-        executor.setAwaitTerminationSeconds(30);             // Макс. время ожидания 30 сек
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 
         log.info("NotificationTaskExecutor initialized: core={}, max={}, queue={}",

@@ -68,7 +68,12 @@ public class UserService {
                 .status(req.status() != null ? req.status() : DriverStatus.OFFLINE)
                 .passwordHash(passwordEncoder.encode(req.password()))
                 .build();
-        driverRepo.save(driver);
+        Driver savedDriver = driverRepo.save(driver);
+
+        if (savedDriver.getStatus() == DriverStatus.FREE) {
+            driverCache.addFreeDriver(savedDriver.getId());
+        }
+
         String token = jwtUtils.generateToken(driver.getId(), driver.getEmail(), Role.DRIVER.name());
         return new AuthResponse(driver.getId(), driver.getEmail(), driver.getName(), Role.DRIVER, token);
     }
